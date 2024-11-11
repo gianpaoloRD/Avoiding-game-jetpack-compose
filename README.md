@@ -24,7 +24,7 @@ A mobile game built with Jetpack Compose in Kotlin, where players control a char
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/gyroscope-game.git
+   git clone https://github.com/gianpaoloRD/gyroscope-game.git
    cd gyroscope-game
    ```
 
