@@ -17,8 +17,8 @@ A mobile game built with Jetpack Compose in Kotlin, where players control a char
 
 1. **Home Screen**: Start the game or view the scoreboard.
 2. **Game Screen**: Navigate the character with gyroscope controls to avoid obstacles and score points.
-3. **Game Over Screen**: Shows the final score and allows players to enter their name.
-4. **Scoreboard Screen**: Displays all recorded scores and allows for resetting the scoreboard.
+3. **Game Over Screen**: Shows the final score and allows players to enter their names.
+4. **Scoreboard Screen**: Displays all recorded scores and allows resetting the scoreboard.
 
 ## Installation
 
@@ -48,7 +48,7 @@ A mobile game built with Jetpack Compose in Kotlin, where players control a char
    - Earn points for each obstacle avoided.
 
 3. **Score Submission**:
-   - After game over, enter your name to save the score.
+   - After the game is over, enter your name to save the score.
    - View the scoreboard to see your score or clear it with the "Erase All Scores" button.
 
 ## Project Structure
