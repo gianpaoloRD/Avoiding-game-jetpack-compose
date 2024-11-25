@@ -1,12 +1,16 @@
 package com.example.game
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.runtime.Composable
 import android.content.res.Configuration
+import android.graphics.Path
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,8 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.delay
 
@@ -35,28 +41,44 @@ fun GyroscopeGame(
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val screenHeight = configuration.screenHeightDp.dp
-    var characterXPosition by remember { mutableStateOf(screenWidth / 2) }
-    var characterYPosition by remember { mutableStateOf(screenHeight / 2) }
+
+    val density = LocalDensity.current
+    val screenWidthPx = with(density) { screenWidth.toPx() }
+    val screenHeightPx = with(density) { screenHeight.toPx() }
+
+    var characterXPosition by remember { mutableStateOf(screenWidthPx / 2) }
+    var characterYPosition by remember { mutableStateOf(screenHeightPx / 2) }
+
     var enemies by remember { mutableStateOf(listOf<Enemy>()) }
     var score by remember { mutableStateOf(0) }
 
     // Spawn enemies periodically
     LaunchedEffect(Unit) {
+        val screenWidthPx = with(density) { screenWidth.toPx() } // Convert width to pixels
+        val screenHeightPx = with(density) { screenHeight.toPx() } // Convert height to pixels
+
         while (true) {
-            val spawnYPosition = (0..(screenHeight.value.toInt() - 50)).random().toFloat()
-            val newEnemy = Enemy(xPosition = screenWidth.value, yPosition = spawnYPosition)
+            // Random Y-position within the screen height in pixels
+            val spawnYPosition = (0..screenHeightPx.toInt()).random().toFloat()
+            // Spawn enemies just outside the right edge of the screen
+            val spawnXPosition = screenWidthPx + 50f // Adjust 50f for off-screen buffer
+
+            val newEnemy = Enemy(xPosition = spawnXPosition, yPosition = spawnYPosition)
             enemies = enemies + newEnemy
-            delay(1500L)
+
+            delay(1500L) // Delay between spawns
         }
     }
 
-    // Update character position
     LaunchedEffect(xRotation, yRotation) {
         val dx = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) yRotation else xRotation
         val dy = if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) xRotation else yRotation
 
-        characterXPosition += dx * 5.dp
-        characterYPosition += dy * 5.dp
+        val deltaX = with(density) { (dx * 5.dp).toPx() }
+        val deltaY = with(density) { (dy * 5.dp).toPx() }
+
+        characterXPosition += deltaX
+        characterYPosition += deltaY
     }
 
     // Handle enemy movement and collisions
@@ -72,9 +94,15 @@ fun GyroscopeGame(
         }
 
         enemies.forEach { enemy ->
-            if (isColliding(characterXPosition.value, characterYPosition.value, enemy.xPosition, enemy.yPosition)) {
+            if (isColliding(
+                    characterXPosition,
+                    characterYPosition,
+                    enemy.xPosition.toFloat(),
+                    enemy.yPosition.toFloat()
+                )) {
                 onGameOver()
             }
+
         }
     }
 
@@ -83,10 +111,10 @@ fun GyroscopeGame(
         GameBackground()
 
         // Render character
-        Character(characterXPosition.value, characterYPosition.value)
+        CharacterCanvas(characterXPosition, characterYPosition)
 
         // Render enemies
-        enemies.forEach { enemy -> Enemy(enemy) }
+        EnemyCanvas(enemies)
 
         // Display score
         ScoreDisplay(score)
@@ -225,46 +253,47 @@ fun ParallaxBackground() {
 }
 
 
+@Composable
+fun CharacterCanvas(xPosition: Float, yPosition: Float) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        drawCircle(
+            color = Color.Blue,
+            center = Offset(xPosition, yPosition),
+            radius = 25f
+        )
+
+        // Add custom shapes or details
+        drawCircle(
+            color = Color.White,
+            center = Offset(xPosition, yPosition - 10f), // Eye
+            radius = 5f
+        )
+
+        drawPath(
+            color = Color.Yellow,
+            path = Path().apply {
+                moveTo(xPosition - 15f, yPosition + 5f) // Beak
+                lineTo(xPosition - 5f, yPosition - 5f)
+                lineTo(xPosition + 5f, yPosition + 5f)
+                close()
+            }
+        )
+    }
+}
 
 @Composable
-fun Character(xPosition: Float, yPosition: Float) {
-    Box(
-        modifier = Modifier
-            .size(100.dp)
-            .offset(
-                x = xPosition.dp - 25.dp, // Center the character
-                y = yPosition.dp - 25.dp
+fun EnemyCanvas(enemies: List<Enemy>) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        enemies.forEach { enemy ->
+            drawCircle(
+                color = Color.Red,
+                center = Offset(enemy.xPosition, enemy.yPosition),
+                radius = 15f // Match the enemySize in collision logic
             )
-            .background(Color(255, 255, 255, 0)), // Optional background
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.mipmap.player), // Replace with your drawable resource
-            contentDescription = "Character",
-            modifier = Modifier.size(100.dp) // Adjust the size as needed
-        )
+        }
     }
 }
 
-
-@Composable
-fun Enemy(enemy: Enemy) {
-    Box(
-        modifier = Modifier
-            .size(100.dp) // Set the size of the enemy
-            .offset(
-                x = enemy.xPosition.dp,
-                y = enemy.yPosition.dp
-            ),
-        contentAlignment = Alignment.Center // Center the image inside the Box
-    ) {
-        Image(
-            painter = painterResource(id = R.mipmap.enemy), // Replace with your drawable resource
-            contentDescription = "Enemy",
-            modifier = Modifier.fillMaxSize() // Ensures the image scales to fit the Box size
-        )
-    }
-}
 @Composable
 fun ScoreDisplay(score: Int) {
     Box(modifier = Modifier.fillMaxSize()) {
