@@ -3,7 +3,7 @@ package com.example.game
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import android.content.res.Configuration
-import android.graphics.Path
+import androidx.compose.ui.graphics.Path
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -23,12 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.delay
+
 
 @Composable
 fun GyroscopeGame(
@@ -111,7 +114,10 @@ fun GyroscopeGame(
         GameBackground()
 
         // Render character
-        CharacterCanvas(characterXPosition, characterYPosition)
+        CharacterWithShadowAndImage(
+            xPosition = characterXPosition,
+            yPosition = characterYPosition
+        )
 
         // Render enemies
         EnemyCanvas(enemies)
@@ -254,32 +260,33 @@ fun ParallaxBackground() {
 
 
 @Composable
-fun CharacterCanvas(xPosition: Float, yPosition: Float) {
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        drawCircle(
-            color = Color.Blue,
-            center = Offset(xPosition, yPosition),
-            radius = 25f
-        )
-
-        // Add custom shapes or details
-        drawCircle(
-            color = Color.White,
-            center = Offset(xPosition, yPosition - 10f), // Eye
-            radius = 5f
-        )
-
-        drawPath(
-            color = Color.Yellow,
-            path = Path().apply {
-                moveTo(xPosition - 15f, yPosition + 5f) // Beak
-                lineTo(xPosition - 5f, yPosition - 5f)
-                lineTo(xPosition + 5f, yPosition + 5f)
-                close()
-            }
+fun CharacterWithShadowAndImage(xPosition: Float, yPosition: Float) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Shadow
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(
+                color = Color.Gray.copy(alpha = 0.3f), // Reduced shadow intensity
+                center = Offset(xPosition + 10f, yPosition + 20f), // Slight offset for realism
+                radius = 50f // Adjusted to be proportional to the image size
+            )
+        }
+        // Plane image
+        Image(
+            painter = painterResource(id = R.mipmap.player), // Replace with your plane image resource
+            contentDescription = "Plane",
+            modifier = Modifier
+                .size(120.dp) // Size of the plane
+                .offset(
+                    x = (xPosition - 60.dp.value).dp, // Align horizontally
+                    y = (yPosition - 60.dp.value).dp  // Align vertically
+                )
         )
     }
 }
+
+
 
 @Composable
 fun EnemyCanvas(enemies: List<Enemy>) {
