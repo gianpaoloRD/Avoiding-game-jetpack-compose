@@ -32,6 +32,7 @@ class GameOverActivity : ComponentActivity() {
 @Composable
 fun GameOverScreen(score: Int) {
     val context = LocalContext.current
+    val defaultName = "PlayerNone"
     var playerName by remember { mutableStateOf("") }
 
     Column(
@@ -57,7 +58,9 @@ fun GameOverScreen(score: Int) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(onClick = {
-            saveScore(context, playerName, score)
+            // Use default name if playerName is blank
+            val finalName = if (playerName.isBlank()) defaultName else playerName
+            saveScore(context, finalName, score)
             context.startActivity(Intent(context, MainActivity::class.java))
         }) {
             Text("Submit Score and Return to Home")

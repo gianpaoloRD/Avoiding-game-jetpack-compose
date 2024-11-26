@@ -267,24 +267,25 @@ fun CharacterWithShadowAndImage(xPosition: Float, yPosition: Float) {
         // Shadow
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
-                color = Color.Gray.copy(alpha = 0.3f), // Reduced shadow intensity
-                center = Offset(xPosition + 10f, yPosition + 20f), // Slight offset for realism
-                radius = 50f // Adjusted to be proportional to the image size
+                color = Color.Gray.copy(alpha = 1f),
+                center = Offset(xPosition + 10f, yPosition + 20f),
+                radius = 75f
             )
         }
-        // Plane image
+        // Plane Image
         Image(
-            painter = painterResource(id = R.mipmap.player), // Replace with your plane image resource
+            painter = painterResource(id = R.mipmap.player), // Ensure the resource is correct
             contentDescription = "Plane",
             modifier = Modifier
-                .size(120.dp) // Size of the plane
+                .size(120.dp) // Ensure the size matches your design
                 .offset(
-                    x = (xPosition - 60.dp.value).dp, // Align horizontally
-                    y = (yPosition - 60.dp.value).dp  // Align vertically
+                    x = with(LocalDensity.current) { (xPosition + 10f).toDp() - 60.dp }, // Adjust for center
+                    y = with(LocalDensity.current) { (yPosition + 20f).toDp() - 60.dp }  // Adjust for center
                 )
         )
     }
 }
+
 
 
 
@@ -293,9 +294,9 @@ fun EnemyCanvas(enemies: List<Enemy>) {
     Canvas(modifier = Modifier.fillMaxSize()) {
         enemies.forEach { enemy ->
             drawCircle(
-                color = Color.Red,
+                color = Color.Black,
                 center = Offset(enemy.xPosition, enemy.yPosition),
-                radius = 15f // Match the enemySize in collision logic
+                radius = 25f // Match the enemySize in collision logic
             )
         }
     }
@@ -319,7 +320,7 @@ fun ScoreDisplay(score: Int) {
 fun isColliding(
     characterX: Float, characterY: Float,
     enemyX: Float, enemyY: Float,
-    characterSize: Float = 50f, enemySize: Float = 20f
+    characterSize: Float = 75f, enemySize: Float = 25f
 ): Boolean {
     return characterX < enemyX + enemySize &&
             characterX + characterSize > enemyX &&

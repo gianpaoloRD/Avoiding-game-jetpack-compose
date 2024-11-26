@@ -10,7 +10,7 @@ val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp
+        fontSize = 18.sp
     ),
     titleLarge = TextStyle(
         fontFamily = FontFamily.Default,
