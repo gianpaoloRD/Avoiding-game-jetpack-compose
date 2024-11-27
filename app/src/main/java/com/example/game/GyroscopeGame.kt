@@ -69,7 +69,7 @@ fun GyroscopeGame(
             val newEnemy = Enemy(xPosition = spawnXPosition, yPosition = spawnYPosition)
             enemies = enemies + newEnemy
 
-            delay(1500L) // Delay between spawns
+            delay(300L) // Delay between spawns
         }
     }
 
