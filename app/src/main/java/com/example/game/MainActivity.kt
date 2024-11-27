@@ -52,5 +52,16 @@ fun HomeScreen() {
         }) {
             Text("View Scoreboard")
         }
+
+        Button(
+            onClick = {
+                val intent = Intent(context, HowToPlayActivity::class.java)
+                context.startActivity(intent)
+            },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("How to Play")
+        }
+
     }
 }
